@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -8,70 +8,106 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import {withRouter, useLocation} from "react-router-dom";
+import {useCookies} from "react-cookie";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import Divider from "@material-ui/core/Divider";
+import TransactionListing from "../Api/TransactionListing";
+import UserConsts from "../constants/Auth/User";
+import * as _ from 'underscore';
+import TextField from "@material-ui/core/TextField";
+
+const useQuery = () => {
+    return new URLSearchParams(useLocation().search);
+};
 
 const columns = [
-    { id: 'name', label: 'Name', minWidth: 170 },
-    { id: 'code', label: 'ISO\u00a0Code', minWidth: 100 },
+    { id: 'hash', label: 'Hash', minWidth: 170 },
+    { id: 'block_number', label: 'Block', minWidth: 100 },
     {
-        id: 'population',
-        label: 'Population',
+        id: 'blockHash',
+        label: 'Block\u00a0Hash',
         minWidth: 170,
-        align: 'right',
-        format: (value) => value.toLocaleString('en-US'),
+        align: 'left'
     },
     {
-        id: 'size',
-        label: 'Size\u00a0(km\u00b2)',
+        id: 'from',
+        label: 'From',
         minWidth: 170,
-        align: 'right',
-        format: (value) => value.toLocaleString('en-US'),
+        align: 'left'
     },
     {
-        id: 'density',
-        label: 'Density',
+        id: 'to',
+        label: 'To',
         minWidth: 170,
-        align: 'right',
-        format: (value) => value.toFixed(2),
+        align: 'left'
     },
+    {
+        id: 'value',
+        label: 'Value',
+        minWidth: 170,
+        align: 'left'
+    },
+    {
+        id: 'transaction_index',
+        label: 'Index',
+        minWidth: 170,
+        align: 'left',
+    }
 ];
 
-function createData(name, code, population, size) {
-    const density = population / size;
-    return { name, code, population, size, density };
-}
-
-const rows = [
-    createData('India', 'IN', 1324171354, 3287263),
-    createData('China', 'CN', 1403500365, 9596961),
-    createData('Italy', 'IT', 60483973, 301340),
-    createData('United States', 'US', 327167434, 9833520),
-    createData('Canada', 'CA', 37602103, 9984670),
-    createData('Australia', 'AU', 25475400, 7692024),
-    createData('Germany', 'DE', 83019200, 357578),
-    createData('Ireland', 'IE', 4857000, 70273),
-    createData('Mexico', 'MX', 126577691, 1972550),
-    createData('Japan', 'JP', 126317000, 377973),
-    createData('France', 'FR', 67022000, 640679),
-    createData('United Kingdom', 'GB', 67545757, 242495),
-    createData('Russia', 'RU', 146793744, 17098246),
-    createData('Nigeria', 'NG', 200962417, 923768),
-    createData('Brazil', 'BR', 210147125, 8515767),
-];
-
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%'
     },
     container: {
         maxHeight: '100%',
-        marginTop: '10%'
     },
-});
+    margin: {
+        margin: theme.spacing(1),
+        marginBottom: '4%',
+        marginTop: '4%',
+    },
+    Input: {
+        margin: theme.spacing(1),
+        marginTop: '4%',
+        marginLeft: '2%',
+        marginRight: '10%',
+        width: '35%'
+    },
+    text: {
+        marginLeft: '2%'
+    }
+}));
 
-export default function TransactionTable() {
+const TransactionTable = props => {
+    const PER_PAGE = 30;
+    const queryParams = useQuery();
     const classes = useStyles();
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+    const [data, setData] = useState([]);
+    const [query, setQuery] = useState("");
+    const [cookies, setCookie] = useCookies(UserConsts.USER_COOKIE);
+    const [loading, setLoading] = useState(true);
+
+
+    const refresh = (data) => {
+        TransactionListing.list({
+            token: cookies[UserConsts.JWT_TOKEN],
+            q: data.query,
+            page: parseInt(data.page ? data.page : '1'),
+            per_page: PER_PAGE,
+        }).then(res => {
+            setData(res.data.result.value);
+        }, err => {
+
+        }).finally(() => {
+            setLoading(false)
+        })
+    };
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -82,51 +118,88 @@ export default function TransactionTable() {
         setPage(0);
     };
 
-    return (
+    const render = () => {
+        props.history.push('/transaction_detail')
+    };
 
-        <Paper className={classes.root}>
-            <TableContainer className={classes.container}>
-                <Table stickyHeader aria-label="sticky table">
-                    <TableHead className={classes.container}>
-                        <TableRow>
-                            {columns.map((column) => (
-                                <TableCell
-                                    key={column.id}
-                                    align={column.align}
-                                    style={{ minWidth: column.minWidth }}
-                                >
-                                    {column.label}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                            return (
-                                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                                    {columns.map((column) => {
-                                        const value = row[column.id];
-                                        return (
-                                            <TableCell key={column.id} align={column.align}>
-                                                {column.format && typeof value === 'number' ? column.format(value) : value}
-                                            </TableCell>
-                                        );
-                                    })}
-                                </TableRow>
-                            );
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onChangePage={handleChangePage}
-                onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-        </Paper>
+     const refreshDebounce = useCallback(_.debounce(data => refresh(data), 1000), []);
+
+    useEffect(() => {
+        setData([]);
+        setLoading(true);
+        refreshDebounce({query, page: parseInt(queryParams.get('page'))})
+    }, [query, parseInt(queryParams.get('page'))]);
+
+    return (
+            <Paper className={classes.root}>
+                <TableContainer className={classes.container}>
+                    <Grid className={classes.margin}>
+                        <Grid item xs>
+                            <Typography gutterBottom variant="h5" className={classes.text}>
+                                Transactions
+                            </Typography>
+                        </Grid>
+                        <Divider variant="middle"/>
+                        <Grid item xs>
+                            <TextField
+                                id="standard-full-width"
+                                label="To/From"
+                                className={classes.Input}
+                                placeholder="Token..."
+                                value={query}
+                                onChange={event => setQuery(event.target.value)}
+                                fullWidth
+                                margin="normal"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead className={classes.container}>
+                            <TableRow>
+                                {columns.map((column) => (
+                                    <TableCell
+                                        key={column.id}
+                                        align={column.align}
+                                        style={{minWidth: column.minWidth}}
+                                    >
+                                        {column.label}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                                return (
+                                    <TableRow hover role="checkbox" tabIndex={-1} key={row.code}
+                                              onClick={() => render()}>
+                                        {columns.map((column) => {
+                                            const value = row[column.id];
+                                            return (
+                                                <TableCell key={column.id} align={column.align}>
+                                                    {column.format && typeof value === 'number' ? column.format(value) : value}
+                                                </TableCell>
+                                            );
+                                        })
+                                        }
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[10, 25, 100]}
+                    component="div"
+                    count={data.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                />
+            </Paper>
     );
-}
+};
+export default withRouter(TransactionTable);

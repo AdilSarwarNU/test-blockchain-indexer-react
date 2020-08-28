@@ -17,6 +17,7 @@ import UserConstants from "../constants/Auth/User";
 import {AppContext} from "../Contexts/AppContext";
 import Auth from "../Api/Auth";
 import { Link } from 'react-router-dom';
+import ProgressButton from "./ProgressButton";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -52,11 +53,11 @@ const LoginForm = props => {
         event.preventDefault();
         setLoading(true);
         Auth.signIn(email, password).then(response => {
-            // setCookies(UserConstants.JWT_TOKEN, response.data.result.token);
-            props.history.push('/user');
+            setCookies(UserConstants.JWT_TOKEN, response.data.result.token);
+            props.history.push('/transactions');
         }, err => {
             console.log("err:", err.message);
-            context.showMessage(err.message, {error: true});
+            context.showMessage("Invalid email entered");
         }).finally(() => {
             setLoading(false);
         });
@@ -72,7 +73,7 @@ const LoginForm = props => {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                <form className={classes.form}>
+                <form className={classes.form} onSubmit={submit}>
                     <TextField
                         variant="outlined"
                         margin="normal"
@@ -111,29 +112,29 @@ const LoginForm = props => {
                     {/*        Login*/}
                     {/*    </ProgressButton>*/}
                     {/*</Col>*/}
-                    <Link to={Routes.TransactionTable}>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            className={classes.submit}
-                        >
-                            Sign In
-                        </Button>
-                    </Link>
-                    <Grid container>
-                        <Grid item xs>
-                            <Link href="#" variant="body2" color="secondary">
-                                Forgot password?
-                            </Link>
-                        </Grid>
-                        <Grid item>
-                            <Link href="#" variant="body2" color="secondary">
-                                {"Don't have an account? Sign Up"}
-                            </Link>
-                        </Grid>
-                    </Grid>
+                    {/*<Link to={Routes.TransactionTable}>*/}
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}
+                    >
+                        Sign In
+                    </Button>
+                    {/*</Link>*/}
+                    {/*<Grid container>*/}
+                    {/*    <Grid item xs>*/}
+                    {/*        <Link href="#" variant="body2" color="secondary">*/}
+                    {/*            Forgot password?*/}
+                    {/*        </Link>*/}
+                    {/*    </Grid>*/}
+                    {/*    <Grid item>*/}
+                    {/*        <Link href="#" variant="body2" color="secondary">*/}
+                    {/*            {"Don't have an account? Sign Up"}*/}
+                    {/*        </Link>*/}
+                    {/*    </Grid>*/}
+                    {/*</Grid>*/}
                 </form>
             </div>
         </Container>

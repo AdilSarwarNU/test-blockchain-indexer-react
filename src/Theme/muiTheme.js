@@ -21,7 +21,18 @@ const theme = createMuiTheme({
         shape: {
             borderRadius: 0
         }
-    }
+    },
+    overrides: {
+        MuiTab: {
+            root: {
+                fontSize: '12px',
+            },
+            fullWidth: {
+                flexGrow: false
+            }
+        }
+    },
+
 });
 
 export default theme;

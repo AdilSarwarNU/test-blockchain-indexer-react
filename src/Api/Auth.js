@@ -6,10 +6,6 @@ const { next } = Response;
 const Auth = {
   signIn: async (email, password) => {
     const endpoint = `http://localhost:3000/api/v1/auth/login`;
-    fetch(endpoint)
-        .then(response => response.text())
-        .then(contents => console.log(contents))
-        .catch(() => console.log("Can’t access " + endpoint + " response. Blocked by browser?"))
     try {
       let response = await Api.post(endpoint, {
         user: {
@@ -25,17 +21,17 @@ const Auth = {
     }
   },
 
-  // validateRequest: async (token) => {
-  //   let endpoint = `/auth/validate-request`;
-  //
-  //   try {
-  //     return await Api.post(endpoint, {
-  //       token
-  //     });
-  //   } catch (e) {
-  //     next(e.response);
-  //   }
-  // }
+  validateRequest: async (token) => {
+    let endpoint = `/auth/validate-request`;
+
+    try {
+      return await Api.post(endpoint, {
+        token
+      });
+    } catch (e) {
+      next(e.response);
+    }
+  }
 };
 
 export default Auth;
