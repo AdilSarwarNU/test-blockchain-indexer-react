@@ -13,6 +13,10 @@ import {useCookies} from "react-cookie";
 import {withRouter} from "react-router-dom";
 import TransactionListing from "../../../Api/TransactionListing";
 import UserConsts from "../../../constants/Auth/User";
+import TextField from "@material-ui/core/TextField";
+import TransactionComments from "../../../Components/TransactionComments";
+import {Button} from "@material-ui/core";
+import Container from "@material-ui/core/Container";
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -61,6 +65,21 @@ const useStyles = makeStyles((theme) => ({
     },
     text: {
         marginLeft: '1%'
+    },
+    container: {
+        flexDirection:"column",
+        marginTop: 15,
+        marginBottom: '3%'
+    },
+    textField:{
+        flex:1,
+        height: 65,
+        borderColor: 'gray',
+        borderWidth: 1
+    },
+    button: {
+        marginTop: '1%',
+        width: 'fit-content'
     }
 
 }));
@@ -73,9 +92,8 @@ export default withRouter(props => {
     const token = cookies[UserConsts.JWT_TOKEN];
     const [data, setData] = useState({});
 
-    const refresh = (data) => {
+    const refresh = () => {
         TransactionListing.details(props.match.params.id, {token}).then(res => {
-            console.log(res)
                 setData(res.data.result)
             }
         ).finally(() => {
@@ -94,9 +112,7 @@ export default withRouter(props => {
         setValue(index);
     };
 
-    console.log("There you go");
-    const getStatsItem = (head, value) => (
-        console.log(value),
+    const getTransactionDetail = (head, value) => (
         <Grid container spacing={3}>
             <Grid item xs={2}>
                 <Typography><strong>{head}</strong></Typography>
@@ -115,46 +131,63 @@ export default withRouter(props => {
                 </Typography>
             </Grid>
             <Divider variant="middle" className={classes.heading} />
-            <AppBar position="static" color="default">
-                <Tabs
-                    value={value}
-                    onChange={handleChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    aria-label="full width tabs example"
+            <Container maxWidth={"xl"}>
+                <AppBar position="static" color="default">
+                    <Tabs
+                        value={value}
+                        onChange={handleChange}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="full width tabs example"
+                    >
+                        <Tab label="Detail" {...a11yProps(0)} />
+                        <Tab label="Comments" {...a11yProps(1)} />
+                    </Tabs>
+                </AppBar>
+                <SwipeableViews
+                    axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+                    index={value}
+                    onChangeIndex={handleChangeIndex}
                 >
-                    <Tab label="Detail" {...a11yProps(0)} />
-                    <Tab label="Comments" {...a11yProps(1)} />
-                </Tabs>
-            </AppBar>
-            <SwipeableViews
-                axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
-                index={value}
-                onChangeIndex={handleChangeIndex}
-            >
-                <TabPanel value={value} index={0} dir={theme.direction}>
-                    {getStatsItem('Hash:', data.hash)}
-                    {getStatsItem('Block Number:', data.block_number)}
-                    {getStatsItem('Block Hash:', data.blockHash)}
-                    {getStatsItem('From:', data.from)}
-                    {getStatsItem('To:', data.to)}
-                    {getStatsItem('Value:', data.value)}
-                    {getStatsItem('Time Stamp:', data.time_stamp)}
-                    {getStatsItem('Nonce:', data.nonce)}
-                    {getStatsItem('Gas:', data.gas)}
-                    {getStatsItem('Gas Price:', data.gas_price)}
-                    {getStatsItem('Gas Used:', data.gas_used)}
-                    {getStatsItem('Cumulative Gas Used:', data.cumulative_gas_used)}
-                    {getStatsItem('IsError:', data.is_error)}
-                    {getStatsItem('Txreceipt Status:', data.txreceipt_status)}
-                    {getStatsItem('Input:', data.input)}
-                    {getStatsItem('Contract Address:', data.contract_address)}
-                    {getStatsItem('Confirmations:', data.confirmations)}
-                </TabPanel>
-                <TabPanel value={value} index={1} dir={theme.direction}>
-                    Item Two
-                </TabPanel>
-            </SwipeableViews>
+                    <TabPanel value={value} index={0} dir={theme.direction}>
+                        {getTransactionDetail('Transaction Hash:', data.hash)}
+                        {getTransactionDetail('Block Number:', data.block_number)}
+                        {getTransactionDetail('Block Hash:', data.blockHash)}
+                        {getTransactionDetail('Timestamp:', data.time_stamp)}
+                        {getTransactionDetail('From:', data.from)}
+                        {getTransactionDetail('To:', data.to)}
+                        {getTransactionDetail('Value:', data.value)}
+                        {getTransactionDetail('Gas Price:', data.gas_price)}
+                        {getTransactionDetail('Gas:', data.gas)}
+                        {getTransactionDetail('Gas Used:', data.gas_used)}
+                        {getTransactionDetail('Cumulative Gas Used:', data.cumulative_gas_used)}
+                        {getTransactionDetail('Nonce:', data.nonce)}
+                        {getTransactionDetail('IsError:', data.is_error)}
+                        {getTransactionDetail('Txreceipt Status:', data.txreceipt_status)}
+                        {getTransactionDetail('Input:', data.input)}
+                        {getTransactionDetail('Contract Address:', data.contract_address)}
+                        {getTransactionDetail('Confirmations:', data.confirmations)}
+                    </TabPanel>
+                    <TabPanel value={value} index={1} dir={theme.direction}>
+                        <Grid container className={classes.container}>
+                            <TextField
+                                className={classes.textField}
+                                variant={"outlined"}
+                                fullWidth
+                                placeholder="Lets Discuss..."
+                                multiline
+                                rows={2}
+                                rowsMax={4}
+                            />
+                            <Button variant="contained" color="primary" component="span" className={classes.button}>
+                                Add Comment
+                            </Button>
+                        </Grid>
+                        <TransactionComments/>
+                    </TabPanel>
+                </SwipeableViews>
+            </Container>
+
         </div>
     );
 });

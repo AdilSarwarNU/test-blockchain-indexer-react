@@ -23,4 +23,13 @@ export default {
       next(e.response);
     }
   },
+
+  getComments: async (transaction_id, {token = ''} = {}) => {
+    let endpoint = `/transactions/${transaction_id}/comments`;
+    try {
+      return await Api.get(endpoint, getConfig(token));
+    } catch (e) {
+      next(e.response);
+    }
+  }
 };
