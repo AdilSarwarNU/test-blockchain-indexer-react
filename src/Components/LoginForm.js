@@ -5,19 +5,15 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import {useCookies} from "react-cookie";
 import Container from '@material-ui/core/Container';
-import Routes from "../Utils/Routes";
 import {withRouter} from "react-router-dom";
 import UserConstants from "../constants/Auth/User";
 import {AppContext} from "../Contexts/AppContext";
 import Auth from "../Api/Auth";
-import { Link } from 'react-router-dom';
-import ProgressButton from "./ProgressButton";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -57,7 +53,7 @@ const LoginForm = props => {
             props.history.push('/transactions');
         }, err => {
             console.log("err:", err.message);
-            context.showMessage("Invalid email entered");
+            context.showMessage(err.message, {error: true});
         }).finally(() => {
             setLoading(false);
         });
@@ -102,17 +98,6 @@ const LoginForm = props => {
                         control={<Checkbox value="remember" color="primary" />}
                         label="Remember me"
                     />
-
-                    {/*<Col xs="12">*/}
-                    {/*    <ProgressButton*/}
-                    {/*        isLoading={isLoading}*/}
-                    {/*        type="submit"*/}
-                    {/*        size="lg"*/}
-                    {/*        color="secondary">*/}
-                    {/*        Login*/}
-                    {/*    </ProgressButton>*/}
-                    {/*</Col>*/}
-                    {/*<Link to={Routes.TransactionTable}>*/}
                     <Button
                         type="submit"
                         fullWidth
@@ -122,19 +107,6 @@ const LoginForm = props => {
                     >
                         Sign In
                     </Button>
-                    {/*</Link>*/}
-                    {/*<Grid container>*/}
-                    {/*    <Grid item xs>*/}
-                    {/*        <Link href="#" variant="body2" color="secondary">*/}
-                    {/*            Forgot password?*/}
-                    {/*        </Link>*/}
-                    {/*    </Grid>*/}
-                    {/*    <Grid item>*/}
-                    {/*        <Link href="#" variant="body2" color="secondary">*/}
-                    {/*            {"Don't have an account? Sign Up"}*/}
-                    {/*        </Link>*/}
-                    {/*    </Grid>*/}
-                    {/*</Grid>*/}
                 </form>
             </div>
         </Container>

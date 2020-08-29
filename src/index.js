@@ -5,10 +5,16 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { ThemeProvider } from '@material-ui/styles';
 import theme from './Theme/muiTheme';
+import {CookiesProvider} from "react-cookie";
+import {AppContextProvider} from "./Contexts/AppContext";
 
 ReactDOM.render(
     <ThemeProvider theme={theme}>
-        <App />
+        <AppContextProvider>
+            <CookiesProvider>
+                <App />
+            </CookiesProvider>
+        </AppContextProvider>
     </ThemeProvider>,
     document.getElementById('root')
 );

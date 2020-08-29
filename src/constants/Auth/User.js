@@ -1,4 +1,4 @@
-const USER_COOKIE = 'user-type';
+const USER_COOKIE = 'user-cookie';
 const USER_ID = 'user-id';
 
 const JWT_TOKEN = 'cookie-jwt';
