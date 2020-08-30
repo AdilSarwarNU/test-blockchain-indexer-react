@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import SwipeableViews from 'react-swipeable-views';
 import {makeStyles, useTheme} from '@material-ui/core/styles';
@@ -13,10 +13,11 @@ import {useCookies} from "react-cookie";
 import {withRouter} from "react-router-dom";
 import TransactionListing from "../../../Api/TransactionListing";
 import UserConsts from "../../../constants/Auth/User";
-import TextField from "@material-ui/core/TextField";
 import TransactionComments from "../../../Components/TransactionComments";
-import {Button} from "@material-ui/core";
 import Container from "@material-ui/core/Container";
+import {AppContext} from "../../../Contexts/AppContext";
+import CommentForm from "../../../Components/CommentForm";
+import Comments from "../../../Api/Comments";
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -65,21 +66,6 @@ const useStyles = makeStyles((theme) => ({
     },
     text: {
         marginLeft: '1%'
-    },
-    container: {
-        flexDirection:"column",
-        marginTop: 15,
-        marginBottom: '3%'
-    },
-    textField:{
-        flex:1,
-        height: 65,
-        borderColor: 'gray',
-        borderWidth: 1
-    },
-    button: {
-        marginTop: '1%',
-        width: 'fit-content'
     }
 
 }));
@@ -87,6 +73,7 @@ const useStyles = makeStyles((theme) => ({
 export default withRouter(props => {
     const classes = useStyles();
     const theme = useTheme();
+    const context = useContext(AppContext);
     const [value, setValue] = React.useState(0);
     const [cookies, setCookie] = useCookies(UserConsts.USER_COOKIE);
     const token = cookies[UserConsts.JWT_TOKEN];
@@ -123,6 +110,15 @@ export default withRouter(props => {
         </Grid>
     );
 
+    const submit = ({body, transaction_id}) => {
+        Comments.create(body, transaction_id, {token}).then(res => {
+            refresh();
+        }, err => {
+            context.showMessage(err.message, {error: true});
+        }).finally(() => {
+        })
+    };
+
     return (
         <div className={classes.root}>
             <Grid>
@@ -141,7 +137,7 @@ export default withRouter(props => {
                         aria-label="full width tabs example"
                     >
                         <Tab label="Detail" {...a11yProps(0)} />
-                        <Tab label="Comments" {...a11yProps(1)} />
+                        <Tab label="Comment" {...a11yProps(1)} />
                     </Tabs>
                 </AppBar>
                 <SwipeableViews
@@ -169,20 +165,11 @@ export default withRouter(props => {
                         {getTransactionDetail('Confirmations:', data.confirmations)}
                     </TabPanel>
                     <TabPanel value={value} index={1} dir={theme.direction}>
-                        <Grid container className={classes.container}>
-                            <TextField
-                                className={classes.textField}
-                                variant={"outlined"}
-                                fullWidth
-                                placeholder="Lets Discuss..."
-                                multiline
-                                rows={2}
-                                rowsMax={4}
-                            />
-                            <Button variant="contained" color="primary" component="span" className={classes.button}>
-                                Add Comment
-                            </Button>
-                        </Grid>
+                        <CommentForm
+                            data={data}
+                            onPositiveAction={item => {
+                                submit(item);
+                            }}/>
                         <TransactionComments/>
                     </TabPanel>
                 </SwipeableViews>

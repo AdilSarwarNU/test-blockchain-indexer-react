@@ -7,6 +7,7 @@ import TransactionListing from "../Api/TransactionListing";
 import {useCookies} from "react-cookie";
 import UserConsts from "../constants/Auth/User";
 import Typography from "@material-ui/core/Typography";
+import Comments from "../Api/Comments";
 
 const TransactionComments = props => {
     const [data, setCommentData] = useState([]);
@@ -14,11 +15,9 @@ const TransactionComments = props => {
     const token = cookies[UserConsts.JWT_TOKEN];
 
     const refresh = (data) => {
-        TransactionListing.getComments(props.match.params.id, {token}).then(res => {
-            console.log(res)
+        Comments.list(props.match.params.id, {token}).then(res => {
             setCommentData(res.data)
-        }).finally(() =>{
-
+        }).finally(() => {
         });
     };
 

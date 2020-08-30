@@ -165,7 +165,7 @@ export default withRouter(props => {
                                     align={column.align}
                                     style={{minWidth: column.minWidth}}
                                 >
-                                    {column.label}
+                                   <strong>{column.label}</strong>
                                 </TableCell>
                             ))}
                         </TableRow>
